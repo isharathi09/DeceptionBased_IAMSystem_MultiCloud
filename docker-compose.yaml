@@ -1,0 +1,36 @@
+version: '3.3'
+
+services:
+  # 1. LocalStack (Simulated AWS Environment)
+  localstack:
+    image: localstack/localstack:3.8.0
+    container_name: mtech_localstack
+    ports:
+      - "4566:4566"            # LocalStack API Gateway port
+    environment:
+      - SERVICES=s3,iam,cloudwatch,sns,sqs
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+  # 2. Keycloak (Identity & Access Management Server)
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.1
+    container_name: mtech_keycloak
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    command: start-dev
+    ports:
+      - "8080:8080"            # Keycloak Web UI & Admin API
+
+  # 3. PostgreSQL Database (Relational Data & Honey-Records)
+  postgres:
+    image: postgres:15-alpine
+    container_name: mtech_postgres
+    environment:
+      - POSTGRES_DB=app_db
+      - POSTGRES_USER=app_user
+      - POSTGRES_PASSWORD=app_password
+    ports:
+      - "5432:5432"            # Database Port
